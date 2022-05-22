@@ -1,4 +1,4 @@
-const OPTIONS = require('./token.js')
+const OPTIONS = require('./token/token.js')
 const TelegramBot = require('node-telegram-bot-api')
 const cron = require('node-cron');
 const express = require('express')
