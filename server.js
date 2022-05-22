@@ -1,16 +1,19 @@
 
 'use strict'
-import TOKEN from './token/token.mjs'
-import tgBot from 'node-telegram-bot-api'
+import express from 'express'
 import fs from 'fs'
+import tgBot from 'node-telegram-bot-api'
+import TOKEN from './token/token.mjs'
+
+const app = express()
+const port = process.env.PORT || 3000
+app.listen(port, () => console.log('Eavesdropping at port',port,'🤫'))
 
 const bot = new tgBot(TOKEN, {polling: true})
-const port = process.env.PORT || 3000
+
 let subscribers = []
 let holidays = {}
 const TODAY = new Date()
-
-app.listen(port, () => console.log('Eavesdropping at port',port,'🤫'))
 
 readFileAsync('./subscribers.db')
 .then( data => subscribers = JSON.parse(data))
