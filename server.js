@@ -85,9 +85,9 @@ bot.on('message', (msg) => {
     }
 })
 
-async function readFileAsync(filename) {
+async function readFileAsync(path) {
     return new Promise( (resolve, reject) => {
-        fs.readFile(filename, 'utf-8', (error, data) => {
+        fs.readFile(path, 'utf-8', (error, data) => {
             if (error) reject(error)
             if (data) {
                 resolve(data)
@@ -96,9 +96,9 @@ async function readFileAsync(filename) {
     })
 }
 
-async function writeFileAsync(filename, data) {
+async function writeFileAsync(path, data) {
     return new Promise( (resolve, reject) => {
-        fs.writeFile(filename, JSON.stringify(data), (error, data) => {
+        fs.writeFile(path, JSON.stringify(data), (error, data) => {
             if (data) {resolve(data)}
             if (error) {reject(error)}
         })
