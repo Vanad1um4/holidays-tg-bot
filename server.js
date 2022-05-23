@@ -1,4 +1,3 @@
-
 'use strict'
 import express from 'express'
 import fs from 'fs'
@@ -61,7 +60,7 @@ bot.on('message', (msg) => {
                 response += `${holiday}` + `\n`
             }
         }
-        bot.sendMessage(chatId, `${response}`, {parse_mode: 'HTML'})
+        bot.sendMessage(chatId, `${response}`, {parse_mode: 'html'})
     }
     if (msg.text === '/getholidays30') {
         let response = ''
@@ -81,7 +80,10 @@ bot.on('message', (msg) => {
                 response += `${holiday}` + `\n`
             }
         }
-        bot.sendMessage(chatId, `${response}`, {parse_mode: 'HTML'})
+        bot.sendMessage(chatId, `${response}`, {parse_mode: 'html'})
+    }
+    if (msg.text === '/start') {
+        bot.sendMessage(chatId, `Main Menu`, {parse_mode: 'html', reply_markup: { 'keyboard': [[{text:'AAA', callback_data:'BBB'}]]} })
     }
 })
 
