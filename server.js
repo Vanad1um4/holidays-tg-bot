@@ -7,7 +7,7 @@ const bot = new tgBot(TOKEN, {polling: true})
 const TZ = 0
 const interval = 1000 * 5 * 60
 
-let subscribers = {}
+let users = {}
 let holidays = {}
 const timeRegex = /([01]\d|2[0-3])([:;.,/-\\*\\+]|)([0-5]\d)/
 let TODAY = addHours(new Date(), TZ)
@@ -18,14 +18,14 @@ setInterval(() => {iterate()}, interval)
 
 function iterate() {
     let i = 0
-    for (const chatId in subscribers) {
-        if (subscribers[chatId]['time'] <= dateToHoursMinutes(TODAY) && subscribers[chatId]['nextDay'] <= dateToApiFormat(TODAY)) {
+    for (const chatId in users) {
+        if (users[chatId]['time'] <= dateToHoursMinutes(TODAY) && users[chatId]['nextDay'] <= dateToApiFormat(TODAY)) {
             bot.sendMessage(chatId, `${sendSerious(7)}`, {parse_mode: 'html'})
-            subscribers[chatId]['nextDay'] = dateToApiFormat(addDays(removeTime(TODAY),1))
+            users[chatId]['nextDay'] = dateToApiFormat(addDays(removeTime(TODAY),1))
             i++
         }
     }
-    if (i > 0) {writeFileAsync('./subscribers.db', subscribers)}
+    if (i > 0) {writeFileAsync('./users.db', users)}
     TODAY = new Date()
     TODAY = addHours(TODAY, TZ)
 }
@@ -54,14 +54,14 @@ function sendSerious(n) {
 
 bot.on('message', (msg) => {
     const chatId = msg.chat.id
-    if (msg.text.search(timeRegex) !== -1 && subscribers?.[chatId]?.['time'] !== undefined) {
+    if (msg.text.search(timeRegex) !== -1 && users?.[chatId]?.['time'] !== undefined) {
         let time1 = msg.text.match(timeRegex)[0]
         let time2 = time1.slice(0,2) + '-' + time1.slice(-2)
-        subscribers[chatId]['time'] = time2
-        subscribers[chatId]['nextDay'] = dateToApiFormat(removeTime(TODAY))
-        // bot.sendMessage(chatId, `Вы успешно поменяли время на ${subscribers[chatId]['time']}! ⏰`)
-        bot.sendMessage(chatId, `Вы успешно поменяли время на ${prettyTime(subscribers[chatId]['time'])}! ⏰`)
-        writeFileAsync('./subscribers.db', subscribers)
+        users[chatId]['time'] = time2
+        users[chatId]['nextDay'] = dateToApiFormat(removeTime(TODAY))
+        // bot.sendMessage(chatId, `Вы успешно поменяли время на ${users[chatId]['time']}! ⏰`)
+        bot.sendMessage(chatId, `Вы успешно поменяли время на ${prettyTime(users[chatId]['time'])}! ⏰`)
+        writeFileAsync('./users.db', users)
     } else if (msg.text === '/main_menu')   {
         const options = optionsMenu()
         bot.sendMessage(chatId, `Смотри, что могу 😜`, options)
@@ -90,22 +90,22 @@ bot.on("callback_query", (callbackQuery) => {
             bot.sendMessage(chatId, `${sendSerious(30)}`, {parse_mode: 'html'})
         }
         if (callbackQuery.data === '/subscribe') {
-            if (subscribers?.[chatId]?.['time'] !== undefined) {
-                bot.sendMessage(chatId, `Вы уже подписаны, так держать! 😊 \nСообщения будут приходить примерно в <b>${prettyTime(subscribers[chatId]['time'])}</b>. \nЕсли вы хотите сменить время подписки, отправьте в ответ время в формате <b>ХХ:ХХ</b>`, {parse_mode: 'html'})
-            } else if (subscribers?.[chatId]?.['time'] === undefined) {
-                subscribers[chatId] = {}
-                subscribers[chatId]['time'] = '12-00'
-                subscribers[chatId]['nextDay'] = dateToApiFormat(removeTime(TODAY))
-                writeFileAsync('./subscribers.db', subscribers)
-                bot.sendMessage(chatId, `Вы успешно подписались! 😊 Сообщения будут приходить примерно в <b>${prettyTime(subscribers[chatId]['time'])}</b>. Если вы хотите сменить время подписки, отправьте в ответ время в формате <b>ХХ:ХХ</b>`, {parse_mode: 'html'})
+            if (users?.[chatId]?.['time'] !== undefined) {
+                bot.sendMessage(chatId, `Вы уже подписаны, так держать! 😊 \nСообщения будут приходить примерно в <b>${prettyTime(users[chatId]['time'])}</b>. \nЕсли вы хотите сменить время подписки, отправьте в ответ время в формате <b>ХХ:ХХ</b>`, {parse_mode: 'html'})
+            } else if (users?.[chatId]?.['time'] === undefined) {
+                users[chatId] = {}
+                users[chatId]['time'] = '12-00'
+                users[chatId]['nextDay'] = dateToApiFormat(removeTime(TODAY))
+                writeFileAsync('./users.db', users)
+                bot.sendMessage(chatId, `Вы успешно подписались! 😊 Сообщения будут приходить примерно в <b>${prettyTime(users[chatId]['time'])}</b>. Если вы хотите сменить время подписки, отправьте в ответ время в формате <b>ХХ:ХХ</b>`, {parse_mode: 'html'})
             }
         }
         if (callbackQuery.data === '/unsubscribe') {
-            if (subscribers?.[chatId]?.['time'] !== undefined) {
-                subscribers[chatId]['time'] = undefined
-                writeFileAsync('./subscribers.db', subscribers)
+            if (users?.[chatId]?.['time'] !== undefined) {
+                users[chatId]['time'] = undefined
+                writeFileAsync('./users.db', users)
                 bot.sendMessage(chatId, 'Вы успешно отписались... Как Вы могли так поступить? 😭')
-            } else if (subscribers?.[chatId]?.['time'] === undefined) {
+            } else if (users?.[chatId]?.['time'] === undefined) {
                 bot.sendMessage(chatId, 'Хм. Вы и так не подписаны... 🤨')
             }
         }
@@ -125,15 +125,18 @@ function optionsMenu() {
 }
 
 async function onInit() {
-    readFileAsync('./subscribers.db')
+    readFileAsync('./users.db')
     .then( data => {
-        subscribers = JSON.parse(data)
-        // console.log(subscribers)
+        users = JSON.parse(data)
+        console.log(Object.keys(users).length,`users loaded,`)
     })
     .catch( err => console.log('err',err))
 
     readFileAsync('./przdnki.txt')
-    .then( data => holidays = JSON.parse(data))
+    .then( data => {
+        holidays = JSON.parse(data)
+        console.log(Object.keys(holidays).length,`holidays loaded,`)
+    })
     .catch( err => console.log('err',err))
 }
 

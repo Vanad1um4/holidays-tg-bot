@@ -4,7 +4,10 @@
 0.3
 node_modules
 pics
-token.mjs
 txts
 public
 bot_settings
+
+bot_settings.txt
+token.mjs
+users.db
