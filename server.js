@@ -39,7 +39,6 @@ function sendSerious(n) {
     console.log('endDate',endDate)
     for (let i = 0; i < Object.keys(workHolidays).length; i++) {
         let dateFromArr = workHolidays[i][0]
-        console.log('dateFromArr',dateFromArr)
         if (dateFromArr === today) {
             const holiday = '❗<b>СЕГОДНЯ - ' + (workHolidays[i][2]).toUpperCase() + '❗</b>'
             response += `${holiday}` + `\n`
