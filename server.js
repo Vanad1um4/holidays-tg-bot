@@ -4,7 +4,7 @@ import tgBot from 'node-telegram-bot-api'
 import TOKEN from './token.mjs'
 
 const bot = new tgBot(TOKEN, {polling: true})
-const TZ = 0
+const TZ = 4
 const interval = 1000 * 5 * 60
 
 let users = {}
@@ -39,6 +39,7 @@ function sendSerious(n) {
     console.log('endDate',endDate)
     for (let i = 0; i < Object.keys(workHolidays).length; i++) {
         let dateFromArr = workHolidays[i][0]
+        console.log('dateFromArr',dateFromArr)
         if (dateFromArr === today) {
             const holiday = '❗<b>СЕГОДНЯ - ' + (workHolidays[i][2]).toUpperCase() + '❗</b>'
             response += `${holiday}` + `\n`
