@@ -135,7 +135,7 @@ async function onInit() {
     })
     .catch( err => console.log('err',err))
 
-    readFileAsync('./workHolidays.txt')
+    readFileAsync('./workholidays.txt')
     .then( data => {
         workHolidays = JSON.parse(data)
         console.log(`Loaded work holidays:`,Object.keys(workHolidays).length)
