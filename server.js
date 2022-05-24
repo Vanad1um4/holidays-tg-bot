@@ -61,13 +61,13 @@ bot.on('message', (msg) => {
         // bot.sendMessage(chatId, `Вы успешно поменяли время на ${users[chatId]['time']}! ⏰`)
         bot.sendMessage(chatId, `Вы успешно поменяли время на ${prettyTime(users[chatId]['time'])}! ⏰`)
         writeFileAsync('./users.db', users)
-    } else if (msg.text === '/main_menu')   {
+    } else if (msg.text === '/start')   {
         const options = optionsMenu()
         bot.sendMessage(chatId, `Смотри, что могу 😜`, options)
     } else if (msg.text === '/time_debug')   {
         bot.sendMessage(chatId, `${TODAY}`)
     } else {
-        const buttons = [[{text:'Да!', callback_data:'/main_menu'}]]
+        const buttons = [[{text:'Да!', callback_data:'/start'}]]
         const inlineKeyboard = { 'inline_keyboard': buttons}
         const options = {parse_mode: 'html', reply_markup: inlineKeyboard}
         bot.sendMessage(chatId, `Ничего не понимаю... 😵 Показать меню?`, options)
@@ -78,7 +78,7 @@ bot.on("callback_query", (callbackQuery) => {
     const chatId = callbackQuery.message.chat.id
     bot.answerCallbackQuery(callbackQuery.id)
     .then(() => {
-        if (callbackQuery.data === '/main_menu') {
+        if (callbackQuery.data === '/start') {
             const options = optionsMenu()
             bot.sendMessage(chatId, `Смотри, что могу 😜`, options)
         }
