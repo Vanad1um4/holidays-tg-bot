@@ -19,12 +19,6 @@ setInterval(() => {iterate()}, interval)
 function iterate() {
     let i = 0
     for (const chatId in subscribers) {
-        console.log(subscribers[chatId]['time'])
-        console.log(dateToHoursMinutes(TODAY))
-        console.log(subscribers[chatId]['nextDay'])
-        console.log(dateToApiFormat(TODAY))
-        console.log(subscribers[chatId]['time'] <= dateToHoursMinutes(TODAY))
-        console.log(subscribers[chatId]['nextDay'] <= dateToApiFormat(TODAY))
         if (subscribers[chatId]['time'] <= dateToHoursMinutes(TODAY) && subscribers[chatId]['nextDay'] <= dateToApiFormat(TODAY)) {
             bot.sendMessage(chatId, `${sendSerious(7)}`, {parse_mode: 'html'})
             subscribers[chatId]['nextDay'] = dateToApiFormat(addDays(removeTime(TODAY),1))
