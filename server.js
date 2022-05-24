@@ -2,7 +2,7 @@
 import express from 'express'
 import fs from 'fs'
 import tgBot from 'node-telegram-bot-api'
-import TOKEN from './token/token.mjs'
+import TOKEN from './token.mjs'
 
 const app = express()
 const port = process.env.PORT || 3000
