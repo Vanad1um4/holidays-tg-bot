@@ -26,15 +26,17 @@ function iterate() {
         }
     }
     if (i > 0) {writeFileAsync('./users.db', users)}
-    TODAY = new Date()
-    TODAY = addHours(TODAY, TZ)
+    TODAY = addHours(new Date(), TZ)
 }
 
 function sendSerious(n) {
     let response = ''
     const today = dateToApiFormat(removeTime(TODAY))
+    console.log('endDate',endDate)
     const tomorrow = dateToApiFormat(addDays(today,1))
+    console.log('endDate',endDate)
     const endDate = dateToApiFormat(addDays(today,n))
+    console.log('endDate',endDate)
     for (let i = 0; i < Object.keys(workHolidays).length; i++) {
         let dateFromArr = workHolidays[i][0]
         if (dateFromArr === today) {
