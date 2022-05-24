@@ -8,7 +8,7 @@ const TZ = 0
 const interval = 1000 * 5 * 60
 
 let users = {}
-let holidays = {}
+let workHolidays = {}
 const timeRegex = /([01]\d|2[0-3])([:;.,/-\\*\\+]|)([0-5]\d)/
 let TODAY = addHours(new Date(), TZ)
 
@@ -35,16 +35,16 @@ function sendSerious(n) {
     const today = dateToApiFormat(removeTime(TODAY))
     const tomorrow = dateToApiFormat(addDays(today,1))
     const endDate = dateToApiFormat(addDays(today,n))
-    for (let i = 0; i < Object.keys(holidays).length; i++) {
-        let dateFromArr = holidays[i][0]
+    for (let i = 0; i < Object.keys(workHolidays).length; i++) {
+        let dateFromArr = workHolidays[i][0]
         if (dateFromArr === today) {
-            const holiday = '❗<b>СЕГОДНЯ - ' + (holidays[i][2]).toUpperCase() + '❗</b>'
+            const holiday = '❗<b>СЕГОДНЯ - ' + (workHolidays[i][2]).toUpperCase() + '❗</b>'
             response += `${holiday}` + `\n`
         } else if (dateFromArr === tomorrow) {
-            const holiday = '⚠️ <b>Завтра - ' + holidays[i][2] + '</b>'
+            const holiday = '⚠️ <b>Завтра - ' + workHolidays[i][2] + '</b>'
             response += `${holiday}` + `\n`
         } else if (dateFromArr > tomorrow && dateFromArr <= endDate) {
-            const holiday = '<b>' + holidays[i][1] + '</b> - ' + holidays[i][2]
+            const holiday = '<b>' + workHolidays[i][1] + '</b> - ' + workHolidays[i][2]
             response += `${holiday}` + `\n`
         }
     }
@@ -119,7 +119,7 @@ function optionsMenu() {
         [{text:'Подписаться на ежедневную рассылку', callback_data:'/subscribe'}],
         [{text:'Отписаться от нее', callback_data:'/unsubscribe'}]
     ]
-    const inlineKeyboardM = { 'inline_keyboard': buttonsM}
+    const inlineKeyboardM = {'inline_keyboard': buttonsM}
     const optionsM = {parse_mode: 'html', reply_markup: inlineKeyboardM}
     return optionsM
 }
@@ -128,14 +128,14 @@ async function onInit() {
     readFileAsync('./users.db')
     .then( data => {
         users = JSON.parse(data)
-        console.log(Object.keys(users).length,`users loaded,`)
+        console.log(`Loaded users:`,Object.keys(users).length)
     })
     .catch( err => console.log('err',err))
 
-    readFileAsync('./przdnki.txt')
+    readFileAsync('./workHolidays.txt')
     .then( data => {
-        holidays = JSON.parse(data)
-        console.log(Object.keys(holidays).length,`holidays loaded,`)
+        workHolidays = JSON.parse(data)
+        console.log(`Loaded work holidays:`,Object.keys(workHolidays).length)
     })
     .catch( err => console.log('err',err))
 }
