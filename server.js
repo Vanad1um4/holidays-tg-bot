@@ -4,18 +4,17 @@ import tgBot from 'node-telegram-bot-api'
 import TOKEN from './token.mjs'
 
 const bot = new tgBot(TOKEN, {polling: true})
-const TZ = 4
+const TZ = 0
+const interval = 1000 * 5 * 60
 
 let subscribers = {}
 let holidays = {}
 const timeRegex = /([01]\d|2[0-3])([:;.,/-\\*\\+]|)([0-5]\d)/
-let TODAY = new Date()
-TODAY = addHours(TODAY, TZ)
+let TODAY = addHours(new Date(), TZ)
 
 onInit()
 
-setInterval(() => {iterate()}, 1000*60*5)
-// setInterval(() => {iterate()}, 1000*5)
+setInterval(() => {iterate()}, interval)
 
 function iterate() {
     let i = 0
@@ -34,6 +33,7 @@ function iterate() {
     }
     if (i > 0) {writeFileAsync('./subscribers.db', subscribers)}
     TODAY = new Date()
+    TODAY = addHours(TODAY, TZ)
 }
 
 function sendSerious(n) {
@@ -71,6 +71,8 @@ bot.on('message', (msg) => {
     } else if (msg.text === '/main_menu')   {
         const options = optionsMenu()
         bot.sendMessage(chatId, `Смотри, что могу 😜`, options)
+    } else if (msg.text === '/time_debug')   {
+        bot.sendMessage(chatId, `${TODAY}`)
     } else {
         const buttons = [[{text:'Да!', callback_data:'/main_menu'}]]
         const inlineKeyboard = { 'inline_keyboard': buttons}
@@ -132,7 +134,7 @@ async function onInit() {
     readFileAsync('./subscribers.db')
     .then( data => {
         subscribers = JSON.parse(data)
-        console.log(subscribers)
+        // console.log(subscribers)
     })
     .catch( err => console.log('err',err))
 
