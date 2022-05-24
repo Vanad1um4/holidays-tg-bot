@@ -5,8 +5,6 @@
 node_modules
 pics
 txts
-public
-bot_settings
 
 bot_settings.txt
 token.mjs
