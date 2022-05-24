@@ -4,11 +4,13 @@ import tgBot from 'node-telegram-bot-api'
 import TOKEN from './token.mjs'
 
 const bot = new tgBot(TOKEN, {polling: true})
+const TZ = 4
 
 let subscribers = {}
 let holidays = {}
 const timeRegex = /([01]\d|2[0-3])([:;.,/-\\*\\+]|)([0-5]\d)/
 let TODAY = new Date()
+TODAY = addHours(TODAY, TZ)
 
 onInit()
 
@@ -17,6 +19,12 @@ setInterval(() => {iterate()}, 1000*60*5)
 function iterate() {
     let i = 0
     for (const chatId in subscribers) {
+        console.log(subscribers[chatId]['time'])
+        console.log(dateToHoursMinutes(TODAY))
+        console.log(subscribers[chatId]['nextDay'])
+        console.log(dateToApiFormat(TODAY))
+        console.log(subscribers[chatId]['time'] <= dateToHoursMinutes(TODAY))
+        console.log(subscribers[chatId]['nextDay'] <= dateToApiFormat(TODAY))
         if (subscribers[chatId]['time'] <= dateToHoursMinutes(TODAY) && subscribers[chatId]['nextDay'] <= dateToApiFormat(TODAY)) {
             bot.sendMessage(chatId, `${sendSerious(7)}`, {parse_mode: 'html'})
             subscribers[chatId]['nextDay'] = dateToApiFormat(addDays(removeTime(TODAY),1))
@@ -171,7 +179,7 @@ function removeTime(date) {                  // AND CONVERT FROM API TO JS STYLE
     return new Date(
       result.getFullYear(),
       result.getMonth(),
-      result.getDate()
+      result.getDate(),
     );
 }
 
@@ -180,6 +188,11 @@ function addDays(date, days = 0) {
     return new Date(result.setDate(result.getDate() + days))
 }
 
+function addHours(date, hours = 0) {
+    const result = new Date(date)
+    return new Date(result.setTime(result.getTime() + hours * 60 * 60 * 1000))
+}
+  
 function prettyTime(input) {
     return input.slice(0,2) + ':' + input.slice(-2)
 }
