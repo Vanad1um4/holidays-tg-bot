@@ -1,12 +1,8 @@
 'use strict'
-import express from 'express'
 import fs from 'fs'
 import tgBot from 'node-telegram-bot-api'
 import TOKEN from './token.mjs'
 
-const app = express()
-const port = process.env.PORT || 3000
-app.listen(port, () => console.log('Eavesdropping at port',port,'🤫'))
 const bot = new tgBot(TOKEN, {polling: true})
 
 let subscribers = {}
