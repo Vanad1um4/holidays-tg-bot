@@ -1,7 +1,6 @@
 'use strict'
 import express from 'express'
 import fs from 'fs'
-import fetch from 'node-fetch'
 import tgBot from 'node-telegram-bot-api'
 import TOKEN from './token/token.mjs'
 
@@ -14,30 +13,10 @@ let subscribers = {}
 let holidays = {}
 const timeRegex = /([01]\d|2[0-3])([:;.,/-\\*\\+]|)([0-5]\d)/
 let TODAY = new Date()
-// let TODAY = '2022.05.20'
-
-// fetch('https://www.calend.ru/holidays/may/')
-// .then( (data) => data.text() )
-// .then( (data2) => data2.toString())
-// .then( (data3) => console.log(data3))
-// .then( data => writeFileAsync('./txt.txt', data))
-// .catch( err => console.log(err) )
-
-// readFileAsync('./txt.txt')
-// .then( data => {
-    // console.log(data.match('holidayweek'))
-    // console.log(data.match('paginator'))
-
-    // return data.slice(data.indexOf('holidayweek'), data.indexOf('paginator'))
-    // console.log(data.slice(data.indexOf('holidayweek'), data.indexOf('paginator')))
-// })
-// .then( data => data.json())
-// .then( data => console.log(data))
 
 onInit()
 
-// setInterval(() => {iterate()}, 1000*60*5);
-setInterval(() => {iterate()}, 5000);
+setInterval(() => {iterate()}, 1000*60*5)
 
 function iterate() {
     let i = 0
@@ -111,14 +90,12 @@ bot.on("callback_query", (callbackQuery) => {
         }
         if (callbackQuery.data === '/subscribe') {
             if (subscribers?.[chatId]?.['time'] !== undefined) {
-                // bot.sendMessage(chatId, '')
                 bot.sendMessage(chatId, `Вы уже подписаны, так держать! 😊 \nСообщения будут приходить примерно в <b>${prettyTime(subscribers[chatId]['time'])}</b>. \nЕсли вы хотите сменить время подписки, отправьте в ответ время в формате <b>ХХ:ХХ</b>`, {parse_mode: 'html'})
             } else if (subscribers?.[chatId]?.['time'] === undefined) {
                 subscribers[chatId] = {}
                 subscribers[chatId]['time'] = '12-00'
                 subscribers[chatId]['nextDay'] = dateToApiFormat(removeTime(TODAY))
                 writeFileAsync('./subscribers.db', subscribers)
-                // bot.sendMessage(chatId, '')
                 bot.sendMessage(chatId, `Вы успешно подписались! 😊 Сообщения будут приходить примерно в <b>${prettyTime(subscribers[chatId]['time'])}</b>. Если вы хотите сменить время подписки, отправьте в ответ время в формате <b>ХХ:ХХ</b>`, {parse_mode: 'html'})
             }
         }
