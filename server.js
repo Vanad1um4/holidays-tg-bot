@@ -15,6 +15,7 @@ TODAY = addHours(TODAY, TZ)
 onInit()
 
 setInterval(() => {iterate()}, 1000*60*5)
+// setInterval(() => {iterate()}, 1000*5)
 
 function iterate() {
     let i = 0
