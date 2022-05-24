@@ -32,9 +32,9 @@ function iterate() {
 function sendSerious(n) {
     let response = ''
     const today = dateToApiFormat(removeTime(TODAY))
-    console.log('endDate',endDate)
+    console.log('today',today)
     const tomorrow = dateToApiFormat(addDays(today,1))
-    console.log('endDate',endDate)
+    console.log('tomorrow',tomorrow)
     const endDate = dateToApiFormat(addDays(today,n))
     console.log('endDate',endDate)
     for (let i = 0; i < Object.keys(workHolidays).length; i++) {
