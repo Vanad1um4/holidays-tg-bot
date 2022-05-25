@@ -9,6 +9,7 @@ const interval = 1000 * 5 * 60
 
 let users = {}
 let workHolidays = {}
+let allHolidays = {}
 const timeRegex = /([01]\d|2[0-3])([:;.,/-\\*\\+]|)([0-5]\d)/
 let TODAY = addHours(new Date(), TZ)
 
@@ -20,35 +21,13 @@ function iterate() {
     let i = 0
     for (const chatId in users) {
         if (users[chatId]['time'] <= dateToHoursMinutes(TODAY) && users[chatId]['nextDay'] <= dateToApiFormat(TODAY)) {
-            bot.sendMessage(chatId, `${sendSerious(7)}`, {parse_mode: 'html'})
+            bot.sendMessage(chatId, `${sendProf1()}`, {parse_mode: 'html'})
             users[chatId]['nextDay'] = dateToApiFormat(addDays(removeTime(TODAY),1))
             i++
         }
     }
     if (i > 0) {writeFileAsync('./users.db', users)}
     TODAY = addHours(new Date(), TZ)
-}
-
-function sendSerious(n) {
-    let response = ''
-    const today = dateToApiFormat(removeTime(TODAY))
-    const tomorrow = dateToApiFormat(addDays(today,1))
-    const endDate = dateToApiFormat(addDays(today,n))
-    for (let i = 0; i < Object.keys(workHolidays).length; i++) {
-        let dateFromArr = workHolidays[i][0]
-        if (dateFromArr === today) {
-            const holiday = '❗<b>СЕГОДНЯ - ' + (workHolidays[i][2]).toUpperCase() + '❗</b>'
-            response += `${holiday}` + `\n`
-        } else if (dateFromArr === tomorrow) {
-            const holiday = '⚠️ <b>Завтра - ' + workHolidays[i][2] + '</b>'
-            response += `${holiday}` + `\n`
-        } else if (dateFromArr > tomorrow && dateFromArr <= endDate) {
-            const holiday = '<b>' + workHolidays[i][1] + '</b> - ' + workHolidays[i][2]
-            response += `${holiday}` + `\n`
-        }
-    }
-    if (response.length === 0) {response = 'В течение ближайших ${n} дней ничего не намечается... 🥱'}
-    return response
 }
 
 bot.on('message', (msg) => {
@@ -61,11 +40,13 @@ bot.on('message', (msg) => {
         // bot.sendMessage(chatId, `Вы успешно поменяли время на ${users[chatId]['time']}! ⏰`)
         bot.sendMessage(chatId, `Вы успешно поменяли время на ${prettyTime(users[chatId]['time'])}! ⏰`)
         writeFileAsync('./users.db', users)
-    } else if (msg.text === '/start')   {
+    } else if (msg.text === '/start')   {   
         const options = optionsMenu()
         bot.sendMessage(chatId, `Смотри, что могу 😜`, options)
-    } else if (msg.text === '/time_debug')   {
-        bot.sendMessage(chatId, `${TODAY}`)
+    } else if (msg.text === '/debug')   {
+        // bot.sendMessage(chatId, `${TODAY}`)
+        // bot.sendMessage(chatId, `${sendProf1()}`, {parse_mode: 'html'})
+        // bot.sendMessage(chatId, `${sendProf(7)}`, {parse_mode: 'html'})
     } else {
         const buttons = [[{text:'Да!', callback_data:'/start'}]]
         const inlineKeyboard = { 'inline_keyboard': buttons}
@@ -82,11 +63,11 @@ bot.on("callback_query", (callbackQuery) => {
             const options = optionsMenu()
             bot.sendMessage(chatId, `Смотри, что могу 😜`, options)
         }
-        if (callbackQuery.data === '/get7daysSeriuos') {
-            bot.sendMessage(chatId, `${sendSerious(7)}`, {parse_mode: 'html'})
+        if (callbackQuery.data === '/getTodayAll') {
+            bot.sendMessage(chatId, `${sendAll()}`, {parse_mode: 'html'})
         }
-        if (callbackQuery.data === '/get30daysSeriuos') {
-            bot.sendMessage(chatId, `${sendSerious(30)}`, {parse_mode: 'html'})
+        if (callbackQuery.data === '/get7daysProf') {
+            bot.sendMessage(chatId, `${sendProf(7)}`, {parse_mode: 'html'})
         }
         if (callbackQuery.data === '/subscribe') {
             if (users?.[chatId]?.['time'] !== undefined) {
@@ -113,14 +94,72 @@ bot.on("callback_query", (callbackQuery) => {
 
 function optionsMenu() {
     const buttonsM = [
-        [{text:'Гос. и проф. праздники на следующие 7 дней', callback_data:'/get7daysSeriuos'}],
-        [{text:'То же, только на месяц вперед', callback_data:'/get30daysSeriuos'}],
-        [{text:'Подписаться на ежедневную рассылку', callback_data:'/subscribe'}],
-        [{text:'Отписаться от нее', callback_data:'/unsubscribe'}]
+        [{text:`🥳 Показать все праздники сегодня`, callback_data:'/getTodayAll'}],
+        [{text:`👩‍💼 Гос. и проф. праздники на неделю вперед`, callback_data:'/get7daysProf'}],
+        [{text:'✅ Подписаться на рассылку гос. и проф. праздников', callback_data:'/subscribe'}],
+        [{text:'⛔ Отписаться рассылки', callback_data:'/unsubscribe'}]
     ]
     const inlineKeyboardM = {'inline_keyboard': buttonsM}
     const optionsM = {parse_mode: 'html', reply_markup: inlineKeyboardM}
     return optionsM
+}
+
+function sendAll() {
+    let response = ''
+    const today = dateToApiFormat(removeTime(TODAY))
+    if (allHolidays[today] !== undefined) {
+        let arrayDateToday = Object.keys(allHolidays[today])
+        let holidaysOneDay = allHolidays[today][arrayDateToday]
+        for (let i = 0; i < holidaysOneDay.length; i++) {response += '🎉 ' + holidaysOneDay[i] + `\n`}
+    }
+    if (response.length === 0) {response = 'Сегодня праздников нет... 🥱'}
+    else {
+        let responseHeader = `🥳 <b>Все праздники сегодня, ${Object.keys(allHolidays[today])}:</b> 🎊\n\n`
+        response = responseHeader + response
+    }
+    return response
+}
+
+function sendProf(n) {
+    let response = ''
+    const today = dateToApiFormat(removeTime(TODAY))
+    const tomorrow = dateToApiFormat(addDays(today,1))
+    const endDate = dateToApiFormat(addDays(today,n))
+    for (let i = 0; i < Object.keys(workHolidays).length; i++) {
+        let dateFromArr = workHolidays[i][0]
+        if (dateFromArr === today) {
+            const holiday = '❗<b>СЕГОДНЯ - ' + (workHolidays[i][2]).toUpperCase() + '❗</b>'
+            response += `${holiday}` + `\n`
+        } else if (dateFromArr === tomorrow) {
+            const holiday = '⚠️ <b>Завтра - ' + workHolidays[i][2] + '</b>'
+            response += `${holiday}` + `\n`
+        } else if (dateFromArr > tomorrow && dateFromArr <= endDate) {
+            const holiday = '💼 <b>' + workHolidays[i][1] + '</b> - ' + workHolidays[i][2]
+            response += `${holiday}` + `\n`
+        }
+    }
+    if (response.length === 0) {response = 'В течение ближайшей недели ничего не намечается... 🥱'}
+    else {
+        let responseHeader = '👩‍💼 <b>Все профессиональные праздники на неделю:</b> 👷‍♂️\n\n' 
+        response = responseHeader + response
+    }
+    return response
+}
+
+function sendProf1() {
+    let response = ''
+    const today = dateToApiFormat(removeTime(TODAY))
+    for (let i = 0; i < Object.keys(workHolidays).length; i++) {
+        if (workHolidays[i][0] === today) {
+            response += '💼 ' + workHolidays[i][2] + '\n'
+        }
+    }
+    if (response.length === 0) {response = 'Сегодня праздников нет... 🥱'}
+    else {
+        let responseHeader = '👩‍💼 <b>Профессиональные праздники сегодня:</b> 👷‍♂️\n\n'
+        response = responseHeader + response
+    }
+    return response
 }
 
 async function onInit() {
@@ -135,6 +174,13 @@ async function onInit() {
     .then( data => {
         workHolidays = JSON.parse(data)
         console.log(`Loaded work holidays:`,Object.keys(workHolidays).length)
+    })
+    .catch( err => console.log('err',err))
+
+    readFileAsync('./allholidays.txt')
+    .then( data => {
+        allHolidays = JSON.parse(data)
+        console.log(`Loaded all holidays:`,Object.keys(allHolidays).length)
     })
     .catch( err => console.log('err',err))
 }
