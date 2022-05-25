@@ -37,7 +37,6 @@ bot.on('message', (msg) => {
         let time2 = time1.slice(0,2) + '-' + time1.slice(-2)
         users[chatId]['time'] = time2
         users[chatId]['nextDay'] = dateToApiFormat(removeTime(TODAY))
-        // bot.sendMessage(chatId, `Вы успешно поменяли время на ${users[chatId]['time']}! ⏰`)
         bot.sendMessage(chatId, `Вы успешно поменяли время на ${prettyTime(users[chatId]['time'])}! ⏰`)
         writeFileAsync('./users.db', users)
     } else if (msg.text === '/start')   {   
@@ -45,8 +44,6 @@ bot.on('message', (msg) => {
         bot.sendMessage(chatId, `Смотри, что могу 😜`, options)
     } else if (msg.text === '/debug')   {
         // bot.sendMessage(chatId, `${TODAY}`)
-        // bot.sendMessage(chatId, `${sendProf1()}`, {parse_mode: 'html'})
-        // bot.sendMessage(chatId, `${sendProf(7)}`, {parse_mode: 'html'})
     } else {
         const buttons = [[{text:'Да!', callback_data:'/start'}]]
         const inlineKeyboard = { 'inline_keyboard': buttons}
